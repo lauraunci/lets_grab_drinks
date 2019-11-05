@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from django.contrib.auth.models import User
 
 
@@ -13,6 +14,12 @@ class Event(models.Model):
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=100)
     address = models.TextField(max_length=250)
-    date_time = models.DateTimeField('event date')
+    date_time = models.DateTimeField(auto_now=False, auto_now_add=False)
     occasion = models.TextField(max_length=150)
-    creator = models.ForeignKey(User, on_delete=models.CASCADE)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE) 
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse('detail', kwargs={'event_id': self.id})

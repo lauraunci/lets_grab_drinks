@@ -7,13 +7,24 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import User, Profile, Event
 from .forms import UserUpdateForm, ProfileUpdateForm
 
+class EventCreate(CreateView):
+    model = Event
+    fields = ['name', 'location', 'address', 'date_time', 'occasion']
+    def form_valid(self, form):
+        form.instance.creator = self.request.user
+        return super().form_valid(form)
 
-# Create your views here.
+class EventUpdate(UpdateView):
+  model = Event
+  # Let's make it impossible to rename a cat :)
+  fields = ['location', 'address', 'date_time']
 
+class EventDelete(DeleteView):
+  model = Event
+  success_url = '/events/'
 
 def home(request):
     return render(request, 'home.html')
-
 
 def signup(request):
     error_message = ''
@@ -69,4 +80,5 @@ def events_index(request):
 
 def events_detail(request, event_id):
     event = Event.objects.get(id=event_id)
-    return render(request, 'events/detail.html', {'event': event})
+    return render(request, 'events/detail.html', { 'event': event })
+
