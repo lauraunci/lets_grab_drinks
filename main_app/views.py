@@ -3,10 +3,24 @@ from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from .models import Event
 
 # Create your views here.
 
+# class Event:
+#     def __init__(self, name, location, address, date, time, occasion):
+#         self.name = name
+#         self.location = location
+#         self.address = address
+#         self.date = date
+#         self.time = time
+#         self.occasion = occasion
+
+
+# events = [
+#     Event('Drinks On Saturday', 'Toronto', '250 King Street', 'Nov 10', '7:00 pm', "let's meet for drinks"),
+#     Event('Birthday for Laura', 'Niagara Falls', '15 main st', 'Dec 6', '5:00 pm', 'birthday party')
+# ]
 
 def home(request):
     return render(request, 'home.html')
@@ -30,3 +44,11 @@ def signup(request):
     form = UserCreationForm()
     context = {'form': form, 'error_message': error_message}
     return render(request, 'registration/signup.html', context)
+
+def events_index(request):
+    events = Event.objects.all()
+    return render(request, 'events/index.html', { 'events': events })
+
+def events_detail(request, event_id):
+    event = Event.objects.get(id=event_id)
+    return render(request, 'events/detail.html', { 'event': event })
