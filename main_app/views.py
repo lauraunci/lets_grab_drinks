@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import User, Profile
+from .models import User, Profile, Event
 from .forms import UserUpdateForm, ProfileUpdateForm
 
 
@@ -60,3 +60,13 @@ def profile_update(request):
         'p_form': p_form,
     }
     return render(request, 'registration/profile_update.html', context)
+
+
+def events_index(request):
+    events = Event.objects.all()
+    return render(request, 'events/index.html', {'events': events})
+
+
+def events_detail(request, event_id):
+    event = Event.objects.get(id=event_id)
+    return render(request, 'events/detail.html', {'event': event})
