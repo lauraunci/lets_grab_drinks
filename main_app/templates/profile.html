@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+<div class="row">
+  <div class="col s6">
+    <div class="card">
+      <div class="card-content">
+        <span class="card-title">{{ user.get_full_name }}</span>
+        <p>{{ user.profile.location }}</p>
+        <p>{{ user.profile.birthday }}</p>
+        <p>Contact:</p>
+        <p>Phone: {{ user.profile.phone }}</p>
+        <p>Email: {{ user.email }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col s6">
+    <div class="card">
+      <div class="card-content">
+        <span class="card-title">Events:</span>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

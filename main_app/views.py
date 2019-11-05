@@ -1,8 +1,11 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from .models import User, Profile
+from .forms import UserUpdateForm, ProfileUpdateForm
 
 
 # Create your views here.
@@ -23,10 +26,37 @@ def signup(request):
             user = form.save()
             # This is how we log a user in via code
             login(request, user)
-            return redirect('home')
+            return redirect('profile')
         else:
             error_message = 'Invalid credentials - try again'
     # A bad POST or a GET request, so render signup.html with an empty form
     form = UserCreationForm()
     context = {'form': form, 'error_message': error_message}
     return render(request, 'registration/signup.html', context)
+
+
+def profile(request):
+    return render(request, 'profile.html')
+
+
+def profile_update(request):
+    if request.method == 'POST':
+        u_form = UserUpdateForm(request.POST, instance=request.user)
+        p_form = ProfileUpdateForm(request.POST)
+
+        if u_form.is_valid() and p_form.is_valid():
+            u_form.save()
+            profile = Profile.objects.create(user_id=request.user.id,
+                                             phone=p_form.cleaned_data['phone'],
+                                             location=p_form.cleaned_data['location'],
+                                             birthday=p_form.cleaned_data['birthday'])
+            return redirect('profile')
+
+    else:
+        u_form = UserUpdateForm(instance=request.user)
+        p_form = ProfileUpdateForm()
+    context = {
+        'u_form': u_form,
+        'p_form': p_form,
+    }
+    return render(request, 'registration/profile_update.html', context)
