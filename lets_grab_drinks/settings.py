@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'lets_grab_drinks.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'lets_grab_drinks',
+        'NAME': ('lets_grab_drinks'),
     }
 }
 
@@ -120,5 +120,5 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/profile/update/'
 LOGOUT_REDIRECT_URL = '/'

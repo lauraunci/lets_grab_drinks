@@ -8,6 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Let's Grab Drinks</title>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </head>
@@ -15,12 +16,13 @@
 <body>
   <header class="navbar-fixed">
     <nav>
-      <div class="nav-wrapper">
+      <div class="nav-wrapper indigo">
         <ul>
           <li><a href="/" class="left brand-logo">&nbsp;&nbsp;Let's Grab Drinks</a></li>
         </ul>
         <ul class="right">
           {% if user.is_authenticated %}
+          <li> <a href="{% url 'profile' %}">My Profile</a></li>
           <li><a href="{% url 'logout' %}">Log Out</a></li>
           <li><a href="/events">All Events</a></li>
           {% else %}
@@ -35,7 +37,7 @@
     {% block content %}
     {% endblock %}
   </main>
-  <footer class="page-footer">
+  <footer class="page-footer indigo">
     <div class="right">All Rights Reserved, &copy; 2019 Drinks &nbsp;</div>
   </footer>
 </body>

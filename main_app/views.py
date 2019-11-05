@@ -1,26 +1,15 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Event
+from .models import User, Profile
+from .forms import UserUpdateForm, ProfileUpdateForm
+
 
 # Create your views here.
 
-# class Event:
-#     def __init__(self, name, location, address, date, time, occasion):
-#         self.name = name
-#         self.location = location
-#         self.address = address
-#         self.date = date
-#         self.time = time
-#         self.occasion = occasion
-
-
-# events = [
-#     Event('Drinks On Saturday', 'Toronto', '250 King Street', 'Nov 10', '7:00 pm', "let's meet for drinks"),
-#     Event('Birthday for Laura', 'Niagara Falls', '15 main st', 'Dec 6', '5:00 pm', 'birthday party')
-# ]
 
 def home(request):
     return render(request, 'home.html')
@@ -37,7 +26,7 @@ def signup(request):
             user = form.save()
             # This is how we log a user in via code
             login(request, user)
-            return redirect('home')
+            return redirect('profile')
         else:
             error_message = 'Invalid credentials - try again'
     # A bad POST or a GET request, so render signup.html with an empty form
@@ -45,10 +34,29 @@ def signup(request):
     context = {'form': form, 'error_message': error_message}
     return render(request, 'registration/signup.html', context)
 
-def events_index(request):
-    events = Event.objects.all()
-    return render(request, 'events/index.html', { 'events': events })
 
-def events_detail(request, event_id):
-    event = Event.objects.get(id=event_id)
-    return render(request, 'events/detail.html', { 'event': event })
+def profile(request):
+    return render(request, 'profile.html')
+
+
+def profile_update(request):
+    if request.method == 'POST':
+        u_form = UserUpdateForm(request.POST, instance=request.user)
+        p_form = ProfileUpdateForm(request.POST)
+
+        if u_form.is_valid() and p_form.is_valid():
+            u_form.save()
+            profile = Profile.objects.create(user_id=request.user.id,
+                                             phone=p_form.cleaned_data['phone'],
+                                             location=p_form.cleaned_data['location'],
+                                             birthday=p_form.cleaned_data['birthday'])
+            return redirect('profile')
+
+    else:
+        u_form = UserUpdateForm(instance=request.user)
+        p_form = ProfileUpdateForm()
+    context = {
+        'u_form': u_form,
+        'p_form': p_form,
+    }
+    return render(request, 'registration/profile_update.html', context)
