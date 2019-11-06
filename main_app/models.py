@@ -14,6 +14,13 @@ class Profile(models.Model):
     location = models.CharField(max_length=50)
     birthday = models.DateField(auto_now=False, auto_now_add=False)
 
+class Attendant(models.Model):
+    confirmations = models.CharField(
+        max_length=1,
+        choices=CONFIRMATIONS,
+        default=CONFIRMATIONS[0][0]
+    )
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
 
 class Event(models.Model):
     name = models.CharField(max_length=100)
@@ -30,13 +37,5 @@ class Event(models.Model):
     def get_absolute_url(self):
         return reverse('detail', kwargs={'event_id': self.id})
 
-class Attendant(models.Model):
-    confirmations = models.CharField(
-        max_length=1,
-        choices=CONFIRMATIONS,
-        default=CONFIRMATIONS[0][0]
-    )
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
 
     
