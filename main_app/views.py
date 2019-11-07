@@ -41,9 +41,10 @@ def signup(request):
         if form.is_valid():
             # This will add the user to the database
             user = form.save()
+            profile = Profile.objects.create(user_id=user.id)
             # This is how we log a user in via code
             login(request, user)
-            return redirect('profile')
+            return redirect('profile_update')
         else:
             error_message = 'Invalid credentials - try again'
     # A bad POST or a GET request, so render signup.html with an empty form
@@ -53,25 +54,23 @@ def signup(request):
 
 
 def profile(request):
-    return render(request, 'profile.html')
+    events = Event.objects.filter(creator=request.user)
+    return render(request, 'profile.html', {'events': events})
 
 
 def profile_update(request):
     if request.method == 'POST':
         u_form = UserUpdateForm(request.POST, instance=request.user)
-        p_form = ProfileUpdateForm(request.POST)
+        p_form = ProfileUpdateForm(request.POST, instance=request.user.profile)
 
         if u_form.is_valid() and p_form.is_valid():
             u_form.save()
-            profile = Profile.objects.create(user_id=request.user.id,
-                                             phone=p_form.cleaned_data['phone'],
-                                             location=p_form.cleaned_data['location'],
-                                             birthday=p_form.cleaned_data['birthday'])
+            p_form.save()
             return redirect('profile')
 
     else:
         u_form = UserUpdateForm(instance=request.user)
-        p_form = ProfileUpdateForm()
+        p_form = ProfileUpdateForm(instance=request.user.profile)
     context = {
         'u_form': u_form,
         'p_form': p_form,
@@ -88,7 +87,12 @@ def events_detail(request, event_id):
     event = Event.objects.get(id=event_id)
     comments = Comment.objects.filter(event_id=event_id, parent=None)
     comment_form = CommentForm()
-    return render(request, 'events/detail.html', {'event': event, 'comments': comments, 'comment_form': comment_form})
+    context = {
+        'event': event,
+        'comments': comments,
+        'comment_form': comment_form
+    }
+    return render(request, 'events/detail.html', context)
 
 
 @login_required

@@ -6,9 +6,10 @@ from mptt.models import MPTTModel, TreeForeignKey
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    phone = models.CharField(max_length=10)
-    location = models.CharField(max_length=50)
-    birthday = models.DateField(auto_now=False, auto_now_add=False)
+    phone = models.CharField(max_length=10, null=True, blank=True)
+    location = models.CharField(max_length=50, null=True, blank=True)
+    birthday = models.DateField(
+        auto_now=False, auto_now_add=False, null=True, blank=True)
 
 
 class Event(models.Model):
