@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<h1>Please complete your profile!</h1>
+<p>In order to get you all set up, we need a bit more information</p>
+
 <form action="{% url 'profile_update' %}" method="post">
   {% csrf_token %}
   {{ u_form.as_p }}
