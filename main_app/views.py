@@ -1,30 +1,36 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import User, Profile, Event
-from .forms import UserUpdateForm, ProfileUpdateForm
+from .models import *
+from .forms import *
+
 
 class EventCreate(CreateView):
     model = Event
     fields = ['name', 'location', 'address', 'date_time', 'occasion']
+
     def form_valid(self, form):
         form.instance.creator = self.request.user
         return super().form_valid(form)
 
+
 class EventUpdate(UpdateView):
-  model = Event
-  # Let's make it impossible to rename a cat :)
-  fields = ['location', 'address', 'date_time']
+    model = Event
+    # Let's make it impossible to rename a cat :)
+    fields = ['location', 'address', 'date_time']
+
 
 class EventDelete(DeleteView):
-  model = Event
-  success_url = '/events/'
+    model = Event
+    success_url = '/events/'
+
 
 def home(request):
     return render(request, 'home.html')
+
 
 def signup(request):
     error_message = ''
@@ -80,5 +86,38 @@ def events_index(request):
 
 def events_detail(request, event_id):
     event = Event.objects.get(id=event_id)
-    return render(request, 'events/detail.html', { 'event': event })
+    comments = Comment.objects.filter(event_id=event_id, parent=None)
+    comment_form = CommentForm()
+    return render(request, 'events/detail.html', {'event': event, 'comments': comments, 'comment_form': comment_form})
 
+
+@login_required
+def post_comment(request, event_id, parent_comment_id=None):
+    event = Event.objects.get(pk=event_id)
+    # print(event)
+    if request.method == 'POST':
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            new_comment = comment_form.save(commit=False)
+            new_comment.event_id = event
+            new_comment.author = request.user
+
+            if parent_comment_id:
+                parent_comment = Comment.objects.get(id=parent_comment_id)
+                new_comment.parent_id = parent_comment.get_root().id
+                new_comment.reply_to = parent_comment.user
+                new_comment.save()
+                return HttpResponse('200 OK')
+
+            new_comment.save()
+            return redirect(event)
+        else:
+            return HttpResponse('The form is incorrect')
+    elif request.method == 'GET':
+        comment_form = CommentForm()
+        context = {
+            'comment_form': comment_form,
+            'event_id': event_id,
+            'parent_comment_id': parent_comment_id
+        }
+        return render(request, 'comment/reply.html', context)

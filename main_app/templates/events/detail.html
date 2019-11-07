@@ -1,20 +1,68 @@
 {% extends 'base.html' %}
 {% block content %}
+{% load mptt_tags %}
 
 <h1>Event Details</h1>
-
-<div class="card">
-    <div class="card-content">
+<div class="row">
+  <div class="col s6">
+    <div class="card">
+      <div class="card-content">
         <span class="card-title">{{ event.name }}</span>
         <p>Location: {{ event.location }}</p>
         <p>Address: {{ event.address }}</p>
         <p>Date/Time: {{ event.date_time }} </p>
         <p>Occasion: {{ event.occasion }}</p>
-    </div>
-    <div class="card-action">
+      </div>
+      <div class="card-action">
         <a href="{% url 'events_update' event.id %}">Edit</a>
         <a href="{% url 'events_delete' event.id %}">Delete</a>
+      </div>
     </div>
+  </div>
+  <div class="col s6">
+    {% for parent in comments %}
+    <div id="p{{parent.id}}">
+      <p class="red-text">{{ parent.author }}</p>
+      <div class="">
+        {{ parent.content }}
+      </div>
+      <div class="">
+        {{ parent.created }} <button onclick="showForm({{parent.id}})">Reply</button>
+      </div>
+      <div class="form" hidden>
+        <form action="{% url 'post_comment' event.id %}" method="post">
+          {% csrf_token %}
+          {{ comment_form.as_p }}
+          <input type="submit" class="btn" value="Post Comment">
+        </form>
+      </div>
+      {% with children=parent.get_children %}
+      {% for child in children %}
+      <div class="offset-s2 col s10">
+        <p class="blue-text">{{ child.author }}</p>
+        <div class="">
+          {{ child.content }}
+        </div>
+        <div class="text-gray">
+          {{ child.created }}
+        </div>
+      </div>
+      {% endfor %}
+      {% endwith %}
+      {% endfor %}
+    </div>
+    <form action="{% url 'post_comment' event.id %}" method="post">
+      {% csrf_token %}
+      {{ comment_form.as_p }}
+      <input type="submit" class="btn" value="Post Comment">
+    </form>
+  </div>
 </div>
+<script type="text/javascript">
+  let showForm = (parentId) => {
+    let form = document.querySelector(`#p${parentId}>.form`)
+
+  }
+</script>
 
 {% endblock %}
