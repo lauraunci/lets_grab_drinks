@@ -22,7 +22,7 @@
   <div class="col s6">
     {% for parent in comments %}
     <div id="p{{parent.id}}">
-      <p class="red-text">{{ parent.author }}</p>
+      <div><span class="red-text">{{ parent.author }}</span> says:</div>
       <div class="">
         {{ parent.content }}
       </div>
@@ -38,8 +38,8 @@
       </div>
       {% with children=parent.get_children %}
       {% for child in children %}
-      <div class="offset-s2 col s10">
-        <p class="blue-text">{{ child.author }}</p>
+      <div class="offset-s1 col s11">
+        <div><span class="blue-text">{{ child.author }}</span> says:</div>
         <div class="">
           {{ child.content }}
         </div>
