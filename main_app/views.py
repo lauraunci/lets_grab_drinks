@@ -5,7 +5,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import User, Profile, Event
-from .forms import UserUpdateForm, ProfileUpdateForm
+from .forms import UserUpdateForm, ProfileUpdateForm, AttendantForm
 
 class EventCreate(CreateView):
     model = Event
@@ -16,7 +16,6 @@ class EventCreate(CreateView):
 
 class EventUpdate(UpdateView):
   model = Event
-  # Let's make it impossible to rename a cat :)
   fields = ['location', 'address', 'date_time']
 
 class EventDelete(DeleteView):
@@ -29,18 +28,13 @@ def home(request):
 def signup(request):
     error_message = ''
     if request.method == 'POST':
-        # This is how to create a 'user' form object
-        # that includes the data from the browser
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            # This will add the user to the database
             user = form.save()
-            # This is how we log a user in via code
             login(request, user)
             return redirect('profile')
         else:
             error_message = 'Invalid credentials - try again'
-    # A bad POST or a GET request, so render signup.html with an empty form
     form = UserCreationForm()
     context = {'form': form, 'error_message': error_message}
     return render(request, 'registration/signup.html', context)
@@ -80,5 +74,16 @@ def events_index(request):
 
 def events_detail(request, event_id):
     event = Event.objects.get(id=event_id)
-    return render(request, 'events/detail.html', { 'event': event })
+    attendant_form = AttendantForm()
+    return render(request, 'events/detail.html', {
+        'event': event, 'attendant_form': attendant_form 
+    })
 
+def add_attendant(request, event_id):
+    form = AttendantForm(request.POST)
+    if form.is_valid():
+        new_attendant = form.save(commit=False)
+        new_attendant.event_id = event_id
+        new_attendant.user = request.user
+        new_attendant.save()
+    return redirect('detail', event_id=event_id)

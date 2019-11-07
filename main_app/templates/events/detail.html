@@ -17,4 +17,39 @@
     </div>
 </div>
 
+<div class="col s6">
+  {% if not user.attendants.event_id == event.id %}
+    <form action="{% url 'add_attendant' event.id %}" method="post">
+        {% csrf_token %}
+        {{ attendant_form.as_p }}
+        <input type="submit" class="btn" value="Add Attendant">
+    </form>
+  {% endif %}
+  <table class="striped">
+    <thead>
+      <tr><th>Date</th><th>Confirmation</th><th>Attendant</th></tr>
+    </thead>
+    <tbody>
+      {% for attendant in event.attendant_set.all %}
+        <tr>
+          <td>{{attendant.date}}</td>
+          <td>{{attendant.get_confirmation_display}}</td>
+          <td>{{attendant.user.get_full_name}}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<script>
+    var dateEl = document.getElementById('id_date');
+    M.Datepicker.init(dateEl, {
+      format: 'yyyy-mm-dd',
+      defaultDate: new Date(),
+      setDefaultDate: true,
+      autoClose: true
+    });
+    
+    var selectEl = document.getElementById('id_confirmation');
+    M.FormSelect.init(selectEl);
+</script>
 {% endblock %}
