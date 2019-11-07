@@ -7,7 +7,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import *
 from .forms import *
 
-
 class EventCreate(CreateView):
     model = Event
     fields = ['name', 'location', 'address', 'date_time', 'occasion']
@@ -19,7 +18,6 @@ class EventCreate(CreateView):
 
 class EventUpdate(UpdateView):
     model = Event
-    # Let's make it impossible to rename a cat :)
     fields = ['location', 'address', 'date_time']
 
 
@@ -35,19 +33,15 @@ def home(request):
 def signup(request):
     error_message = ''
     if request.method == 'POST':
-        # This is how to create a 'user' form object
-        # that includes the data from the browser
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            # This will add the user to the database
             user = form.save()
             profile = Profile.objects.create(user_id=user.id)
-            # This is how we log a user in via code
+
             login(request, user)
             return redirect('profile_update')
         else:
             error_message = 'Invalid credentials - try again'
-    # A bad POST or a GET request, so render signup.html with an empty form
     form = UserCreationForm()
     context = {'form': form, 'error_message': error_message}
     return render(request, 'registration/signup.html', context)
@@ -87,12 +81,24 @@ def events_detail(request, event_id):
     event = Event.objects.get(id=event_id)
     comments = Comment.objects.filter(event_id=event_id, parent=None)
     comment_form = CommentForm()
+    attendant_form = AttendantForm()
     context = {
         'event': event,
         'comments': comments,
         'comment_form': comment_form
+        'attendant_form': attendant_form
     }
     return render(request, 'events/detail.html', context)
+  
+
+def add_attendant(request, event_id):
+    form = AttendantForm(request.POST)
+    if form.is_valid():
+        new_attendant = form.save(commit=False)
+        new_attendant.event_id = event_id
+        new_attendant.user = request.user
+        new_attendant.save()
+    return redirect('detail', event_id=event_id)
 
 
 @login_required
