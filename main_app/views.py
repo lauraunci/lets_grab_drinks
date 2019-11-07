@@ -7,6 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import *
 from .forms import *
 
+
 class EventCreate(CreateView):
     model = Event
     fields = ['name', 'location', 'address', 'date_time', 'occasion']
@@ -85,11 +86,11 @@ def events_detail(request, event_id):
     context = {
         'event': event,
         'comments': comments,
-        'comment_form': comment_form
-        'attendant_form': attendant_form
+        'comment_form': comment_form,
+        'attendant_form': attendant_form,
     }
     return render(request, 'events/detail.html', context)
-  
+
 
 def add_attendant(request, event_id):
     form = AttendantForm(request.POST)
