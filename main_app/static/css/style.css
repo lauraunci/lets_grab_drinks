@@ -1,4 +1,5 @@
 footer.page-footer {
-  padding-top: auto;
+  padding-top: 0;
   text-align: right;
+  height: 20px;
 }
