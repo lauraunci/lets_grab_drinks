@@ -33,7 +33,7 @@
         <form action="{% url 'comment_reply' event.id parent.id %}" method="post">
           {% csrf_token %}
           {{ comment_form.as_p }}
-          <input type="submit" class="btn" value="Post Comment">
+          <input type="submit" class="btn gray" value="Post Reply">
         </form>
       </div>
       {% with children=parent.get_children %}
