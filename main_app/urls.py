@@ -15,6 +15,6 @@ urlpatterns = [
          views.EventDelete.as_view(), name='events_delete'),
     path('events/<int:event_id>/post_comment/',
          views.post_comment, name='post_comment'),
-    path('events/<int:pk>/<int:parent_comment_id>/comment_reply',
+    path('events/<int:event_id>/<int:parent>/comment_reply',
          views.post_comment, name='comment_reply')
 ]

@@ -92,7 +92,7 @@ def events_detail(request, event_id):
 
 
 @login_required
-def post_comment(request, event_id, parent_comment_id=None):
+def post_comment(request, event_id, parent=None):
     event = Event.objects.get(pk=event_id)
     # print(event)
     if request.method == 'POST':
@@ -102,17 +102,13 @@ def post_comment(request, event_id, parent_comment_id=None):
             new_comment.event_id = event
             new_comment.author = request.user
 
-            if parent_comment_id:
-                parent_comment = Comment.objects.get(id=parent_comment_id)
-                new_comment.parent_id = parent_comment.get_root().id
-                new_comment.reply_to = parent_comment.user
+            if parent:
+                parent_comment = Comment.objects.get(id=parent)
+                new_comment.parent = parent_comment
                 new_comment.save()
-                return HttpResponse('200 OK')
 
             new_comment.save()
             return redirect(event)
-        else:
-            return HttpResponse('The form is incorrect')
     elif request.method == 'GET':
         comment_form = CommentForm()
         context = {

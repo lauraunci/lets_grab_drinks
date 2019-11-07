@@ -30,7 +30,7 @@
         {{ parent.created }} <button onclick="showForm({{parent.id}})">Reply</button>
       </div>
       <div class="form" hidden>
-        <form action="{% url 'post_comment' event.id %}" method="post">
+        <form action="{% url 'comment_reply' event.id parent.id %}" method="post">
           {% csrf_token %}
           {{ comment_form.as_p }}
           <input type="submit" class="btn" value="Post Comment">
@@ -61,7 +61,7 @@
 <script type="text/javascript">
   let showForm = (parentId) => {
     let form = document.querySelector(`#p${parentId}>.form`)
-
+    form.removeAttribute("hidden")
   }
 </script>
 
