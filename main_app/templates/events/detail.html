@@ -1,9 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-{% load mptt_tags %}
 <div class="container">
-
-  <h1>Event Details</h1>
   <div class="row">
     <div class="col s6">
       <div class="card">
@@ -14,11 +11,12 @@
           <p>Date/Time: {{ event.date_time }} </p>
           <p>Occasion: {{ event.occasion }}</p>
         </div>
-
+        {% if event.creator == user %}
         <div class="card-action">
           <a href="{% url 'events_update' event.id %}">Edit</a>
           <a href="{% url 'events_delete' event.id %}">Delete</a>
         </div>
+        {% endif %}
       </div>
       {% if not user.attendant.event.id == event.id%}
       <form action="{% url 'add_attendant' event.id %}" method="post">
@@ -28,19 +26,20 @@
       </form>
       {% endif %}
       <table class="striped">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Confirmation</th>
-            <th>Attendant</th>
-          </tr>
-        </thead>
         <tbody>
           {% for attendant in event.attendant_set.all %}
           <tr>
-            <td>{{attendant.date}}</td>
-            <td>{{attendant.get_confirmation_display}}</td>
             <td>{{attendant.user.get_full_name}}</td>
+            <td>
+              {% if attendant.confirmation == 'Y' %}
+              <i class="material-icons">check</i>
+              {% elif attendant.confirmation == 'N' %}
+              <i class="material-icons">close</i>
+              {% elif attendant.confirmation == 'M' %}
+              <i class="material-icons">help_outline</i>
+              {% endif %}
+            </td>
+            <td>{{attendant.date|date:"SHORT_DATE_FORMAT" }}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -49,14 +48,15 @@
     <div class="col s6">
       {% if comments %}
       {% for parent in comments %}
-      <div id="p{{parent.id}}">
+      <div id="p{{parent.id}}" class="parent">
         <div><span class="red-text">{{ parent.author }}</span> says:</div>
         <div class="">
           {{ parent.content }}
         </div>
-        <div class="">
-          {{ parent.created }} <button onclick="showForm({{parent.id}})">Reply</button>
+        <div class="created">
+          {{ parent.created }}
         </div>
+        <button class="btn reply" onclick="showForm({{parent.id}})">Reply<i class="material-icons right">details</i></button>
         <div class="form" hidden>
           <form action="{% url 'comment_reply' event.id parent.id %}" method="post">
             {% csrf_token %}
@@ -66,12 +66,12 @@
         </div>
         {% with children=parent.get_children %}
         {% for child in children %}
-        <div class="offset-s1 col s11">
+        <div class="child">
           <div><span class="blue-text">{{ child.author }}</span> says:</div>
           <div class="">
             {{ child.content }}
           </div>
-          <div class="text-gray">
+          <div class="created">
             {{ child.created }}
           </div>
         </div>
