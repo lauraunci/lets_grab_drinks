@@ -1,103 +1,115 @@
 {% extends 'base.html' %}
 {% block content %}
 {% load mptt_tags %}
+<div class="container">
 
-<h1>Event Details</h1>
-<div class="row">
-  <div class="col s6">
-    <div class="card">
-      <div class="card-content">
-        <span class="card-title">{{ event.name }}</span>
-        <p>Location: {{ event.location }}</p>
-        <p>Address: {{ event.address }}</p>
-        <p>Date/Time: {{ event.date_time }} </p>
-        <p>Occasion: {{ event.occasion }}</p>
+  <h1>Event Details</h1>
+  <div class="row">
+    <div class="col s6">
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">{{ event.name }}</span>
+          <p>Location: {{ event.location }}</p>
+          <p>Address: {{ event.address }}</p>
+          <p>Date/Time: {{ event.date_time }} </p>
+          <p>Occasion: {{ event.occasion }}</p>
+        </div>
+
+        <div class="card-action">
+          <a href="{% url 'events_update' event.id %}">Edit</a>
+          <a href="{% url 'events_delete' event.id %}">Delete</a>
+        </div>
       </div>
-      <div class="card-action">
-        <a href="{% url 'events_update' event.id %}">Edit</a>
-        <a href="{% url 'events_delete' event.id %}">Delete</a>
-      </div>
+      {% if not user.attendant.event.id == event.id%}
+      <form action="{% url 'add_attendant' event.id %}" method="post">
+        {% csrf_token %}
+        {{ attendant_form.as_p }}
+        <input type="submit" class="btn" value="RSVP">
+      </form>
+      {% endif %}
+      <table class="striped">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Confirmation</th>
+            <th>Attendant</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for attendant in event.attendant_set.all %}
+          <tr>
+            <td>{{attendant.date}}</td>
+            <td>{{attendant.get_confirmation_display}}</td>
+            <td>{{attendant.user.get_full_name}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-  </div>
-  <div class="col s6">
-    {% for parent in comments %}
-    <div id="p{{parent.id}}">
-      <div><span class="red-text">{{ parent.author }}</span> says:</div>
-      <div class="">
-        {{ parent.content }}
-      </div>
-      <div class="">
-        {{ parent.created }} <button onclick="showForm({{parent.id}})">Reply</button>
-      </div>
-      <div class="form" hidden>
-        <form action="{% url 'comment_reply' event.id parent.id %}" method="post">
-          {% csrf_token %}
-          {{ comment_form.as_p }}
-          <input type="submit" class="btn gray" value="Post Reply">
-        </form>
-      </div>
-      {% with children=parent.get_children %}
-      {% for child in children %}
-      <div class="offset-s1 col s11">
-        <div><span class="blue-text">{{ child.author }}</span> says:</div>
+    <div class="col s6">
+      {% if comments %}
+      {% for parent in comments %}
+      <div id="p{{parent.id}}">
+        <div><span class="red-text">{{ parent.author }}</span> says:</div>
         <div class="">
-          {{ child.content }}
+          {{ parent.content }}
         </div>
-        <div class="text-gray">
-          {{ child.created }}
+        <div class="">
+          {{ parent.created }} <button onclick="showForm({{parent.id}})">Reply</button>
         </div>
+        <div class="form" hidden>
+          <form action="{% url 'comment_reply' event.id parent.id %}" method="post">
+            {% csrf_token %}
+            {{ comment_form.as_p }}
+            <input type="submit" class="btn gray" value="Post Reply">
+          </form>
+        </div>
+        {% with children=parent.get_children %}
+        {% for child in children %}
+        <div class="offset-s1 col s11">
+          <div><span class="blue-text">{{ child.author }}</span> says:</div>
+          <div class="">
+            {{ child.content }}
+          </div>
+          <div class="text-gray">
+            {{ child.created }}
+          </div>
+        </div>
+        {% endfor %}
+        {% endwith %}
+        {% endfor %}
       </div>
-      {% endfor %}
-      {% endwith %}
-      {% endfor %}
+      <form action="{% url 'post_comment' event.id %}" method="post">
+        {% csrf_token %}
+        {{ comment_form.as_p }}
+        <input type="submit" class="btn" value="Post Comment">
+      </form>
+      {% else %}
+      <p>No Comments Yet!</p>
+      <form action="{% url 'post_comment' event.id %}" method="post">
+        {% csrf_token %}
+        {{ comment_form.as_p }}
+        <input type="submit" class="btn" value="Post Comment">
+      </form>
     </div>
-    <form action="{% url 'post_comment' event.id %}" method="post">
-      {% csrf_token %}
-      {{ comment_form.as_p }}
-      <input type="submit" class="btn" value="Post Comment">
-    </form>
+    {% endif %}
   </div>
 </div>
-<script type="text/javascript">
+<script>
   let showForm = (parentId) => {
     let form = document.querySelector(`#p${parentId}>.form`)
     form.removeAttribute("hidden")
   }
-</script>
 
-<div class="col s6">
-  {% if not user.attendants.event_id == event.id %}
-    <form action="{% url 'add_attendant' event.id %}" method="post">
-        {% csrf_token %}
-        {{ attendant_form.as_p }}
-        <input type="submit" class="btn" value="Add Attendant">
-    </form>
-  {% endif %}
-  <table class="striped">
-    <thead>
-      <tr><th>Date</th><th>Confirmation</th><th>Attendant</th></tr>
-    </thead>
-    <tbody>
-      {% for attendant in event.attendant_set.all %}
-        <tr>
-          <td>{{attendant.date}}</td>
-          <td>{{attendant.get_confirmation_display}}</td>
-          <td>{{attendant.user.get_full_name}}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-<script>
-    var dateEl = document.getElementById('id_date');
-    M.Datepicker.init(dateEl, {
-      format: 'yyyy-mm-dd',
-      defaultDate: new Date(),
-      setDefaultDate: true,
-      autoClose: true
-    });
-    
-    var selectEl = document.getElementById('id_confirmation');
-    M.FormSelect.init(selectEl);
+  var dateEl = document.getElementById('id_date');
+  M.Datepicker.init(dateEl, {
+    format: 'yyyy-mm-dd',
+    defaultDate: new Date(),
+    setDefaultDate: true,
+    autoClose: true
+  });
+
+  var selectEl = document.getElementById('id_confirmation');
+  M.FormSelect.init(selectEl);
 </script>
 {% endblock %}

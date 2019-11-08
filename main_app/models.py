@@ -32,15 +32,16 @@ class Event(models.Model):
     def get_absolute_url(self):
         return reverse('detail', kwargs={'event_id': self.id})
 
-      
+
 class Attendant(models.Model):
-    date = models.DateField('confirmation date')
+    date = models.DateField('confirmation date', auto_now=True)
     confirmation = models.CharField(
         max_length=1,
         choices=CONFIRMATIONS,
         default=CONFIRMATIONS[0][0]
     )
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, primary_key=True)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
 
 

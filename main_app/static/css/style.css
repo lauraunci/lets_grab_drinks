@@ -3,3 +3,15 @@ footer.page-footer {
   text-align: right;
   height: 20px;
 }
+
+#id_content {
+  width: inherit;
+}
+
+label[for=id_content] {
+  display: none;
+}
+
+.select_wrapper>.select_dropdown {
+  display: inline-block;
+}
