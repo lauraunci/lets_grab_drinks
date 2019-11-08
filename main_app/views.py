@@ -8,7 +8,7 @@ from .models import *
 from .forms import *
 
 
-class EventCreate(CreateView):
+class EventCreate(LoginRequiredMixin, CreateView):
     model = Event
     fields = ['name', 'location', 'address', 'date_time', 'occasion']
 
@@ -17,12 +17,12 @@ class EventCreate(CreateView):
         return super().form_valid(form)
 
 
-class EventUpdate(UpdateView):
+class EventUpdate(LoginRequiredMixin, UpdateView):
     model = Event
     fields = ['location', 'address', 'date_time']
 
 
-class EventDelete(DeleteView):
+class EventDelete(LoginRequiredMixin, DeleteView):
     model = Event
     success_url = '/events/'
 
@@ -48,6 +48,7 @@ def signup(request):
     return render(request, 'registration/signup.html', context)
 
 
+@login_required
 def profile(request):
     events = Event.objects.filter(creator=request.user)
     return render(request, 'profile.html', {'events': events})
@@ -78,6 +79,7 @@ def events_index(request):
     return render(request, 'events/index.html', {'events': events})
 
 
+@login_required
 def events_detail(request, event_id):
     event = Event.objects.get(id=event_id)
     comments = Comment.objects.filter(event_id=event_id, parent=None)
@@ -92,6 +94,7 @@ def events_detail(request, event_id):
     return render(request, 'events/detail.html', context)
 
 
+@login_required
 def add_attendant(request, event_id):
     form = AttendantForm(request.POST)
     if form.is_valid():
